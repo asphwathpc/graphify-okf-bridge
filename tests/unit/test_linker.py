@@ -202,6 +202,30 @@ def test_sql_comment_lines_are_stripped_before_scanning() -> None:
     assert matches == []
 
 
+def test_sql_inline_comment_is_stripped_before_matching() -> None:
+    """A real match followed by an inline comment that itself mentions a table
+    name must not spuriously match the commented-out mention (issue #3)."""
+    text = "SELECT * FROM orders -- see JOIN customers below"
+    matches = _scan_file_signals(text, is_sql=True)
+    assert matches == [("reads_from", "orders", "sql_literal")]
+
+
+def test_python_inline_comment_is_stripped_before_matching() -> None:
+    text = "x = 1  # FROM events_legacy"
+    matches = _scan_file_signals(text, is_sql=False)
+    assert matches == []
+
+
+def test_sql_comment_marker_inside_string_literal_is_not_treated_as_comment() -> None:
+    """A '--' that sits inside an open quote is ambiguous (odd quote count before
+    it) and must not truncate the line -- the legitimate JOIN after it must still
+    be found (MAPPING.md L8: ambiguous marker position leaves the line untouched)."""
+    text = "SELECT * FROM orders WHERE label = 'contains -- marker' JOIN customers ON true"
+    matches = _scan_file_signals(text, is_sql=True)
+    assert ("reads_from", "orders", "sql_literal") in matches
+    assert ("reads_from", "customers", "sql_literal") in matches
+
+
 def test_partial_string_identifier_never_matches_without_sql_keyword() -> None:
     matches = _scan_file_signals('BANNER = "purchase orders_are_processed_nightly"', is_sql=False)
     assert matches == []

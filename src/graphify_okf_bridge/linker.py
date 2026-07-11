@@ -206,13 +206,32 @@ def _module_node(nodes: list[Node]) -> str:
     return min(nodes, key=lambda n: (_line_number(n.source_location), n.id)).id
 
 
+def _strip_inline_comment(line: str, comment_prefix: str) -> str:
+    """MAPPING.md L8: strip a trailing inline comment, but only at a marker position
+    unambiguously outside a string literal (an even number of both `'` and `"`
+    precede it). If no occurrence qualifies, the line is returned unmodified.
+    """
+    idx = line.find(comment_prefix)
+    while idx != -1:
+        prefix = line[:idx]
+        if prefix.count("'") % 2 == 0 and prefix.count('"') % 2 == 0:
+            return line[:idx].rstrip()
+        idx = line.find(comment_prefix, idx + 1)
+    return line
+
+
 def _scan_file_signals(text: str, *, is_sql: bool) -> list[tuple[str, str, str]]:
-    """MAPPING.md L8/L9: strip whole-line comments, then run the dbt + SQL-literal regexes.
+    """MAPPING.md L8/L9: strip whole-line and inline comments, then run the dbt +
+    SQL-literal regexes.
 
     Returns deduplicated (relation, table_name, linker_signal) triples.
     """
     comment_prefix = "--" if is_sql else "#"
-    lines = [line for line in text.splitlines() if not line.lstrip().startswith(comment_prefix)]
+    lines = [
+        _strip_inline_comment(line, comment_prefix)
+        for line in text.splitlines()
+        if not line.lstrip().startswith(comment_prefix)
+    ]
 
     matches: set[tuple[str, str, str]] = set()
 
