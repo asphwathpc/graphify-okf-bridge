@@ -37,7 +37,7 @@ Keep PRs scoped to one change. `export()`, `import_bundle()`, and `link()` are p
 
 ## Finding something to work on
 
-Look for issues tagged [`good first issue`](https://github.com/Graphify-Labs/graphify-okf-bridge/labels/good%20first%20issue) on GitHub. If nothing's tagged yet, open an issue describing what you'd like to tackle before starting — this keeps mapping-rule changes aligned with MAPPING.md up front rather than in review.
+Look for issues tagged [`good first issue`](https://github.com/asphwathpc/graphify-okf-bridge/labels/good%20first%20issue) on GitHub. If nothing's tagged yet, open an issue describing what you'd like to tackle before starting — this keeps mapping-rule changes aligned with MAPPING.md up front rather than in review.
 
 ## Reporting bugs
 
