@@ -61,6 +61,15 @@ def validate(bundle: Bundle, diagnostics: Sequence[Diagnostic] = ()) -> Validati
                     )
                 )
 
+    if bundle.okf_version is None:
+        warnings.append(
+            Diagnostic(
+                path="index.md",
+                level="warning",
+                message="missing 'okf_version' in root index.md frontmatter",
+            )
+        )
+
     concept_dirs = {posixpath.dirname(cid) for cid in bundle.concepts} | {""}
     for dir_path in sorted(concept_dirs):
         if not (bundle.root / dir_path / "index.md").exists():

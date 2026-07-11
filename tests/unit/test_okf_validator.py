@@ -71,3 +71,19 @@ def test_missing_index_is_a_soft_warning(tmp_path: Path) -> None:
     report = validate(bundle, diagnostics)
     assert report.errors == []
     assert any("index" in w.message.lower() for w in report.warnings)
+
+
+def test_missing_okf_version_is_a_soft_warning() -> None:
+    bundle = Bundle(root=Path("."), concepts={}, okf_version=None)
+    report = validate(bundle)
+    assert report.errors == []
+    version_warnings = [w for w in report.warnings if "okf_version" in w.message]
+    assert len(version_warnings) == 1
+    assert version_warnings[0].path == "index.md"
+
+
+def test_present_okf_version_produces_no_warning() -> None:
+    bundle = Bundle(root=Path("."), concepts={}, okf_version="0.1")
+    report = validate(bundle)
+    assert report.errors == []
+    assert not any("okf_version" in w.message for w in report.warnings)
