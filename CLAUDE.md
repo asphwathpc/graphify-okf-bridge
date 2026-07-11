@@ -39,7 +39,7 @@ uv run okf-bridge validate tests/fixtures/okf_official/ga4   # smoke test
 
 ## Key mapping decisions (summary — MAPPING.md has the normative text)
 
-- Node → concept at `<node_type>/<slug>.md`; `graphify_node_id` stored in frontmatter for lossless round-trip.
+- Node → concept at `<file_type>/<slug>.md` (`file_type` used verbatim: code/document/paper/image/rationale/concept — graph.json has no finer AST-level type); `graphify_node_id` stored in frontmatter for lossless round-trip.
 - Edge → *both* a markdown link in the `## Connections` body section (so untyped OKF consumers see it) *and* a typed entry in the `links:` frontmatter extension: `{target, rel, confidence}`.
 - Import: typed `links:` entries keep their rel/confidence; plain body links become `references`/`EXTRACTED` edges.
 - Round-trip invariant: `import(export(g))` preserves node count, edge count, relations, confidences.
@@ -50,7 +50,7 @@ Track phase progress here (update at the end of each session):
 
 - [x] Phase 0 — bootstrap, fixtures, graph.json schema discovery
 - [x] Phase 1 — OKF model/reader/writer/validator
-- [ ] Phase 2 — exporter
+- [x] Phase 2 — exporter
 - [ ] Phase 3 — importer + round-trip
 - [ ] Phase 4 — linker
 - [ ] Phase 5 — skill packaging, demo, PyPI release

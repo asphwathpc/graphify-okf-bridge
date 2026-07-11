@@ -25,10 +25,9 @@ def test_cli_help_lists_all_commands() -> None:
 
 
 def test_remaining_subcommands_stubbed_not_broken() -> None:
-    """`validate` is implemented as of Phase 1; export/import/link remain stubs."""
+    """`validate`/`export` are implemented as of Phase 1/2; import/link remain stubs."""
     runner = CliRunner()
     for args in (
-        ["export", str(FIXTURES / "tiny_graph.json"), "-o", "/tmp/out"],
         ["import", str(FIXTURES / "okf_minimal"), "-o", "/tmp/out.json"],
         [
             "link",

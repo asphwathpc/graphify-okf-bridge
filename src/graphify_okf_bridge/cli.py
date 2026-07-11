@@ -12,8 +12,11 @@ from pathlib import Path
 import click
 
 from graphify_okf_bridge import __version__
+from graphify_okf_bridge.exporter import export as export_graph
+from graphify_okf_bridge.graphify_io.loader import load_graph
 from graphify_okf_bridge.okf.reader import read_bundle
 from graphify_okf_bridge.okf.validator import validate as validate_bundle
+from graphify_okf_bridge.okf.writer import write_bundle
 
 _NOT_IMPLEMENTED = "not implemented yet — see IMPLEMENTATION_PLAN.md Phase {phase}"
 
@@ -46,7 +49,9 @@ def validate(bundle_dir: str, strict: bool) -> None:
 @click.option("-o", "--out", "bundle_dir", required=True, type=click.Path(file_okay=False))
 def export(graph_json: str, bundle_dir: str) -> None:
     """Export a graphify GRAPH_JSON to an OKF bundle."""
-    raise click.ClickException(_NOT_IMPLEMENTED.format(phase=2))
+    graph = load_graph(graph_json)
+    bundle = export_graph(graph)
+    write_bundle(bundle, Path(bundle_dir))
 
 
 @main.command(name="import")

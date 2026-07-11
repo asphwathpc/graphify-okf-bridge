@@ -75,19 +75,30 @@ by the schema.
 
 ## 2. Export: graph.json → OKF bundle
 
+**§1 correction before implementation:** the original draft of E1/E2 (below)
+assumed an AST-level `node_type` finer than what graph.json actually carries
+(`Code Class`, `Code Function`, …). The real schema only has the coarse
+`file_type` enum (`code`/`document`/`paper`/`image`/`rationale`/`concept`,
+§1) — there is no per-node signal distinguishing a class from a function.
+Per ground rule 1/4 (MAPPING.md wins, update it first), E1/E2 are revised to
+map directly off `file_type` rather than inventing a classifier. Likewise E5
+originally assumed a community *label*; graph.json's `community` field is a
+bare int with no label anywhere in the document, so tags carry the int only.
+
 | # | Rule | Level |
 |---|------|-------|
-| E1 | Every node maps to exactly one concept document at `<node_type_plural_slug>/<slug>.md`. | MUST |
-| E2 | Frontmatter `type` is a human-readable namespaced value (`Code Class`, `Code Function`, `Doc`, `Rationale`, …), never empty (OKF §9). | MUST |
+| E1 | Every node maps to exactly one concept document at `<file_type>/<slug>.md` (`file_type` used verbatim as the directory: `code/`, `document/`, `paper/`, `image/`, `rationale/`, `concept/`). | MUST |
+| E2 | Frontmatter `type` is `file_type` title-cased (`Code`, `Document`, `Paper`, `Image`, `Rationale`, `Concept`), never empty (OKF §9). | MUST |
 | E3 | Frontmatter carries `graphify_node_id: <original id>` for lossless identity round-trip. | MUST |
-| E4 | Node source location → `resource: file://<relpath>#L<line>`. | MUST |
-| E5 | Community membership → `tags: [community:<label>]`. | SHOULD |
-| E6 | Docstrings and `# WHY:` / `# NOTE:` rationale → markdown body. | SHOULD |
-| E7 | Every edge appears **twice**: as a markdown link in a `## Connections` body section (visible to untyped OKF consumers, §5.3) and as a typed entry in the `links:` frontmatter extension (§4.1 permits arbitrary keys):<br>`links: [{target: /<path>.md, rel: <relation>, confidence: extracted\|inferred}]` | MUST |
-| E8 | Bundle root gets `index.md` with `okf_version: "0.1"` frontmatter; every directory gets a generated `index.md` (§6); root gets `log.md` with a Creation entry (§7). | MUST |
+| E4 | Node source location → `resource: file://<source_file>#<source_location>` (`source_location` is graphify's own `"L<n>"` string, used as-is); omit the fragment when `source_location` is `null`. | MUST |
+| E5 | Community membership → `tags: [community:<community-int>]`; omitted when `community` is `null`. | SHOULD |
+| E6 | For `file_type: rationale` nodes, `label` (graphify's own extracted docstring / `# WHY:` / `# NOTE:` text — already truncated by graphify where applicable, not further truncated here) → markdown body. Other file types get an empty body except for the generated `## Connections` section (E7). | SHOULD |
+| E6b | Frontmatter `description` is synthesized (never left empty): rationale nodes reuse `label` verbatim; all other nodes get `` `<type>` node `<label>` (`<source_file>`) `` — ground rule 5 requires bridge-authored bundles to pass `validate --strict` with zero warnings, and the validator warns on missing `description`. | MUST |
+| E7 | Every edge appears **twice**, rendered once from the edge's `source` concept: as a markdown link in a `## Connections` body section (visible to untyped OKF consumers, §5.3) and as a typed entry in the `links:` frontmatter extension (§4.1 permits arbitrary keys):<br>`links: [{target: /<path>.md, rel: <relation>, confidence: <lowercased edge.confidence>}]`. `confidence` is graphify's `EXTRACTED`/`INFERRED`/`AMBIGUOUS` lowercased verbatim — MAPPING originally enumerated only `extracted\|inferred`; `ambiguous` is preserved too rather than dropped (ground rule: never silently diverge / drop information). | MUST |
+| E8 | Bundle root gets `index.md` with `okf_version: "0.1"` frontmatter; every directory gets a generated `index.md` (§6). Root `log.md` generation (§7) is **deferred**: OKF marks it optional (MAY), and graph.json carries no date field anywhere (`built_at_commit` is a commit hash, not a timestamp) — synthesizing a wall-clock date to populate the required `## YYYY-MM-DD` heading would violate ground rule 4 (determinism: no timestamps except ones derived from input data). Revisit if/when graphify exposes a build timestamp. | MUST (index) / DEFERRED (log) |
 | E9 | Output is deterministic: byte-identical across runs on the same input (sorted iteration, stable slugs, no wall-clock timestamps). | MUST |
-| E10 | Slug registry is bijective: node id ↔ concept id; collisions resolved with deterministic numeric suffixes. | MUST |
-| E11 | Graph highlights (god nodes, communities) → `overview.md` at bundle root, `type: Overview`. | SHOULD |
+| E10 | Slug registry is bijective per directory: node id ↔ concept id within its `file_type` bucket; collisions resolved with deterministic numeric suffixes. Slugs are generated from `label`, not `id` (friendlier filenames); the registry keeps identity via `node_id`. | MUST |
+| E11 | Graph highlights (node/edge counts, top nodes by degree) → `overview.md` at bundle root, `type: Overview`, degree ranking sorted `(-degree, node_id)` for determinism. Hyperedges are **not** exported in v0.1 — OKF has no n-ary relationship primitive and typed `links:` are binary; revisit if/when a multi-target convention is proposed upstream (see docs/proposal.md roadmap v0.4). | SHOULD |
 
 ## 3. Import: OKF bundle → graph.json
 
@@ -116,3 +127,4 @@ by the schema.
 |------|----------|-----------|
 | 2026-07-11 | Initial convention drafted. | Baseline from proposal + OKF v0.1 spec review. |
 | 2026-07-11 | §1 filled from a real graphify capture; `.sql` files produce no graph nodes in a stock run. | graphify's AST pass is Python-only and semantic extraction skips the `code` file category entirely — `linker.py` (Phase 4) must read `.sql` sources from disk, not from graph.json. |
+| 2026-07-11 | §Export (E1/E2/E5) revised to map off `file_type` instead of an invented AST-level node type; §Export (E8) defers `log.md` generation. | graph.json has no finer type signal than `file_type` and no community label or build date — MAPPING.md is corrected to ground truth before Phase 2 implementation, per ground rule 1/4. |
