@@ -49,7 +49,7 @@ uv run okf-bridge validate tests/fixtures/okf_official/ga4   # smoke test
 Track phase progress here (update at the end of each session):
 
 - [x] Phase 0 — bootstrap, fixtures, graph.json schema discovery
-- [ ] Phase 1 — OKF model/reader/writer/validator
+- [x] Phase 1 — OKF model/reader/writer/validator
 - [ ] Phase 2 — exporter
 - [ ] Phase 3 — importer + round-trip
 - [ ] Phase 4 — linker

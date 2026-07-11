@@ -24,11 +24,23 @@ def test_cli_help_lists_all_commands() -> None:
         assert cmd in result.output
 
 
-def test_cli_subcommands_stubbed_not_broken() -> None:
+def test_remaining_subcommands_stubbed_not_broken() -> None:
+    """`validate` is implemented as of Phase 1; export/import/link remain stubs."""
     runner = CliRunner()
-    result = runner.invoke(main, ["validate", str(FIXTURES / "okf_minimal")])
-    assert result.exit_code != 0
-    assert "not implemented" in result.output
+    for args in (
+        ["export", str(FIXTURES / "tiny_graph.json"), "-o", "/tmp/out"],
+        ["import", str(FIXTURES / "okf_minimal"), "-o", "/tmp/out.json"],
+        [
+            "link",
+            str(FIXTURES / "tiny_graph.json"),
+            str(FIXTURES / "okf_minimal"),
+            "-o",
+            "/tmp/out.json",
+        ],
+    ):
+        result = runner.invoke(main, args)
+        assert result.exit_code != 0
+        assert "not implemented" in result.output
 
 
 def test_okf_minimal_fixture_is_conformant() -> None:

@@ -7,9 +7,13 @@ stays unit-testable. See CLAUDE.md ground rule 7.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import click
 
 from graphify_okf_bridge import __version__
+from graphify_okf_bridge.okf.reader import read_bundle
+from graphify_okf_bridge.okf.validator import validate as validate_bundle
 
 _NOT_IMPLEMENTED = "not implemented yet — see IMPLEMENTATION_PLAN.md Phase {phase}"
 
@@ -25,7 +29,16 @@ def main() -> None:
 @click.option("--strict", is_flag=True, help="Promote warnings to errors.")
 def validate(bundle_dir: str, strict: bool) -> None:
     """Check BUNDLE_DIR for OKF v0.1 conformance (spec section 9)."""
-    raise click.ClickException(_NOT_IMPLEMENTED.format(phase=1))
+    bundle, diagnostics = read_bundle(Path(bundle_dir))
+    report = validate_bundle(bundle, diagnostics)
+
+    for issue in [*report.errors, *report.warnings]:
+        click.echo(f"{issue.level.upper():7} {issue.path}: {issue.message}")
+
+    click.echo(f"{len(report.errors)} error(s), {len(report.warnings)} warning(s)")
+
+    if not report.ok(strict=strict):
+        raise click.exceptions.Exit(1)
 
 
 @main.command()
