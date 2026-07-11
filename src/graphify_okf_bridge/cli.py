@@ -13,7 +13,8 @@ import click
 
 from graphify_okf_bridge import __version__
 from graphify_okf_bridge.exporter import export as export_graph
-from graphify_okf_bridge.graphify_io.loader import load_graph
+from graphify_okf_bridge.graphify_io.loader import load_graph, save_graph
+from graphify_okf_bridge.importer import import_bundle
 from graphify_okf_bridge.okf.reader import read_bundle
 from graphify_okf_bridge.okf.validator import validate as validate_bundle
 from graphify_okf_bridge.okf.writer import write_bundle
@@ -59,7 +60,13 @@ def export(graph_json: str, bundle_dir: str) -> None:
 @click.option("-o", "--out", "graph_json", required=True, type=click.Path(dir_okay=False))
 def import_(bundle_dir: str, graph_json: str) -> None:
     """Import an OKF BUNDLE_DIR into a mergeable graphify graph.json."""
-    raise click.ClickException(_NOT_IMPLEMENTED.format(phase=3))
+    bundle, read_diagnostics = read_bundle(Path(bundle_dir))
+    graph, import_diagnostics = import_bundle(bundle)
+
+    for diagnostic in [*read_diagnostics, *import_diagnostics]:
+        click.echo(f"{diagnostic.level.upper():7} {diagnostic.path}: {diagnostic.message}")
+
+    save_graph(graph, graph_json)
 
 
 @main.command()

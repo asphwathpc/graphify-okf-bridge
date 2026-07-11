@@ -51,6 +51,6 @@ Track phase progress here (update at the end of each session):
 - [x] Phase 0 — bootstrap, fixtures, graph.json schema discovery
 - [x] Phase 1 — OKF model/reader/writer/validator
 - [x] Phase 2 — exporter
-- [ ] Phase 3 — importer + round-trip
+- [x] Phase 3 — importer + round-trip
 - [ ] Phase 4 — linker
 - [ ] Phase 5 — skill packaging, demo, PyPI release
