@@ -22,11 +22,11 @@ OKF_BRIDGE := uv run --project $(PROJECT_ROOT) okf-bridge
 
 demo: $(OUT)/merged.json
 	@echo
-	@echo "== graphify path: stg_orders.sql -> customers (via the linker's dbt-ref edges) =="
-	graphify path "stg_orders.sql" "customers" --graph $(OUT)/merged.json
+	@echo "== graphify path: stg_orders.sql -> orders (via the linker's dbt-ref edges) =="
+	graphify path "stg_orders.sql" "orders" --graph $(OUT)/merged.json
 	@echo
-	@echo "== graphify explain: customers (now carries both dbt lineage and the GA4 import) =="
-	graphify explain "customers" --graph $(OUT)/merged.json
+	@echo "== graphify explain: orders (reads_from edges the linker inferred) =="
+	graphify explain "orders" --graph $(OUT)/merged.json
 
 $(JAFFLE_SHOP):
 	mkdir -p $(OUT)

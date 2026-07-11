@@ -1,5 +1,7 @@
 # Demo: dbt + GA4, one connected graph
 
+![graphify path and graphify explain traversing a graph merged by graphify-okf-bridge](hero.gif)
+
 This walks a real public dbt project ([`dbt-labs/jaffle-shop`](https://github.com/dbt-labs/jaffle-shop))
 and Google's official [GA4 OKF sample bundle](https://github.com/GoogleCloudPlatform/knowledge-catalog)
 through the full `graphify-okf-bridge` pipeline, ending with a single merged
@@ -62,15 +64,37 @@ and can be 10-50x slower than one that fits with headroom.
    `graphify merge-graphs` namespaces node ids per source file and would
    otherwise produce a second, duplicate copy of each table concept.
 5. `graphify merge-graphs <ga4> <linked>` — one graph.
-6. `graphify path "stg_orders.sql" "customers"` — traverses
-   `stg_orders.sql` → (dbt ref, `reads_from`) → the `orders` table concept →
-   (dbt ref) → the `customers` table concept, entirely through edges that
-   didn't exist in either source system on its own.
-7. `graphify explain "customers"` — shows the merged node's neighbors
-   spanning both the dbt lineage and (harmlessly) the unrelated GA4 import.
+6. `graphify path "stg_orders.sql" "orders"` — traverses
+   `stg_orders.sql` → (dbt ref, `references [EXTRACTED]`) → the `orders`
+   dbt model → (`reads_from [INFERRED]`) → the `orders` table concept, the
+   last hop being an edge the linker inferred and that didn't exist in
+   either source system on its own. (Cross-model pairs like
+   `"stg_orders.sql" "customers"` still resolve, but take a longer,
+   less illustrative route through incidental shared references — `orders`
+   is the model `stg_orders.sql` actually feeds, so it's the representative
+   example.)
+7. `graphify explain "orders"` — shows the merged table concept's neighbors:
+   both the `orders` *and* `customers` dbt models read from it, plus the
+   `order_items.sql` source file the linker resolved on disk — three
+   `reads_from [INFERRED]` edges the bridge added, none present in
+   jaffle-shop's own `graph.json`. (GA4 stays a deliberately disconnected
+   component in the merged graph — see above — so it won't show up here.)
 
 `make clean` removes `.demo-out/` (the clone + generated graphs; nothing here
 is committed to the repo).
+
+## Regenerating hero.gif
+
+The GIF above is `demo/hero.gif`, recorded from the final two `make demo`
+commands with [`charmbracelet/vhs`](https://github.com/charmbracelet/vhs)
+(`brew install vhs`) against an already-built `.demo-out/merged.json`:
+
+```bash
+cd demo
+vhs hero.tape
+```
+
+See [`hero.tape`](hero.tape) for the exact script.
 
 ## MCP
 
