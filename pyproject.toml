@@ -1,6 +1,6 @@
 [project]
 name = "graphify-okf-bridge"
-version = "0.0.1"
+version = "0.1.0"
 description = "Bridge between Graphify code knowledge graphs and Google's Open Knowledge Format (OKF)"
 readme = "README.md"
 license = { file = "LICENSE" }
