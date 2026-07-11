@@ -32,7 +32,7 @@ def test_cli_subcommands_stubbed_not_broken() -> None:
 
 
 def test_okf_minimal_fixture_is_conformant() -> None:
-    """Every non-reserved .md in the minimal bundle has frontmatter with a type (OKF spec section 9)."""
+    """Every non-reserved .md in the minimal bundle has frontmatter with a type (spec section 9)."""
     bundle = FIXTURES / "okf_minimal"
     concept_files = [
         p for p in bundle.rglob("*.md") if p.name not in ("index.md", "log.md")

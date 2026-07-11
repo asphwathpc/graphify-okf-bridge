@@ -1,0 +1,590 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {
+    "hyperedges": [
+      {
+        "id": "docs_adr_0001_revenue_computation_flow",
+        "label": "Warehouse Revenue Computation Flow",
+        "nodes": [
+          "docs_adr_0001_revenue_in_warehouse",
+          "docs_adr_0001_orders_table",
+          "docs_adr_0001_stg_orders",
+          "app_service",
+          "app_service_revenue_query"
+        ],
+        "relation": "participate_in",
+        "confidence": "INFERRED",
+        "confidence_score": 0.75,
+        "source_file": "/Users/ashwathpc/Developer/brain/graphify-okf-bridge/tests/fixtures/tiny_repo/docs/adr-0001.md"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "label": "models.py",
+      "file_type": "code",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "app_models",
+      "community": 1,
+      "norm_label": "models.py"
+    },
+    {
+      "label": "BaseModel",
+      "file_type": "code",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "app_models_basemodel",
+      "community": 2,
+      "norm_label": "basemodel"
+    },
+    {
+      "label": ".save()",
+      "file_type": "code",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "app_models_basemodel_save",
+      "community": 2,
+      "norm_label": ".save()"
+    },
+    {
+      "label": "Order",
+      "file_type": "code",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "app_models_order",
+      "community": 1,
+      "norm_label": "order"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "app_models_order_init",
+      "community": 1,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": "Customer",
+      "file_type": "code",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "app_models_customer",
+      "community": 3,
+      "norm_label": "customer"
+    },
+    {
+      "label": "Domain models for the tiny fixture app.  Deliberately exercises: class definitio",
+      "file_type": "rationale",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "app_models_rationale_1",
+      "community": 1,
+      "norm_label": "domain models for the tiny fixture app.  deliberately exercises: class definitio"
+    },
+    {
+      "label": "Common persistence behaviour for all models.",
+      "file_type": "rationale",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "app_models_rationale_9",
+      "community": 2,
+      "norm_label": "common persistence behaviour for all models."
+    },
+    {
+      "label": "Persist the model. # NOTE: simplified for the fixture.",
+      "file_type": "rationale",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "app_models_rationale_14",
+      "community": 2,
+      "norm_label": "persist the model. # note: simplified for the fixture."
+    },
+    {
+      "label": "One completed customer order.",
+      "file_type": "rationale",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "app_models_rationale_18",
+      "community": 1,
+      "norm_label": "one completed customer order."
+    },
+    {
+      "label": "A customer. Exact-name linker case: matches the 'customers' table.",
+      "file_type": "rationale",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "app_models_rationale_28",
+      "community": 3,
+      "norm_label": "a customer. exact-name linker case: matches the 'customers' table."
+    },
+    {
+      "label": "service.py",
+      "file_type": "code",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "app_service",
+      "community": 0,
+      "norm_label": "service.py"
+    },
+    {
+      "label": "compute_revenue()",
+      "file_type": "code",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "app_service_compute_revenue",
+      "community": 4,
+      "norm_label": "compute_revenue()"
+    },
+    {
+      "label": "Order",
+      "file_type": "code",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "order",
+      "community": 4,
+      "norm_label": "order"
+    },
+    {
+      "label": "load_customer()",
+      "file_type": "code",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "app_service_load_customer",
+      "community": 3,
+      "norm_label": "load_customer()"
+    },
+    {
+      "label": "Customer",
+      "file_type": "code",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "customer",
+      "community": 3,
+      "norm_label": "customer"
+    },
+    {
+      "label": "Order service \u2014 exercises imports, calls, SQL literals, and linker traps.",
+      "file_type": "rationale",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "app_service_rationale_1",
+      "community": 0,
+      "norm_label": "order service \u2014 exercises imports, calls, sql literals, and linker traps."
+    },
+    {
+      "label": "Trap 3: 'session' is ambiguous across datasets \u2014 must NOT link.",
+      "file_type": "rationale",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "app_service_rationale_23",
+      "community": 4,
+      "norm_label": "trap 3: 'session' is ambiguous across datasets \u2014 must not link."
+    },
+    {
+      "label": "# WHY: we aggregate revenue in SQL rather than Python so the warehouse",
+      "file_type": "rationale",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "app_service_rationale_5",
+      "community": 0,
+      "norm_label": "# why: we aggregate revenue in sql rather than python so the warehouse"
+    },
+    {
+      "label": "Revenue Computed in the Warehouse (ADR-0001)",
+      "file_type": "rationale",
+      "source_file": "docs/adr-0001.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "docs_adr_0001_revenue_in_warehouse",
+      "community": 0,
+      "norm_label": "revenue computed in the warehouse (adr-0001)"
+    },
+    {
+      "label": "orders table",
+      "file_type": "concept",
+      "source_file": "docs/adr-0001.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "docs_adr_0001_orders_table",
+      "community": 0,
+      "norm_label": "orders table"
+    },
+    {
+      "label": "REVENUE_QUERY",
+      "file_type": "code",
+      "source_file": "docs/adr-0001.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "app_service_revenue_query",
+      "community": 0,
+      "norm_label": "revenue_query"
+    },
+    {
+      "label": "stg_orders table",
+      "file_type": "concept",
+      "source_file": "docs/adr-0001.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "docs_adr_0001_stg_orders",
+      "community": 0,
+      "norm_label": "stg_orders table"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "app_models",
+      "target": "app_models_basemodel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "app_models",
+      "target": "app_models_customer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "app_models",
+      "target": "app_models_order",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "app_models_rationale_1",
+      "target": "app_models",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "app_service",
+      "target": "app_models",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "app_models_basemodel",
+      "target": "app_models_basemodel_save",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "app_models_customer",
+      "target": "app_models_basemodel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "app_models_order",
+      "target": "app_models_basemodel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "app_models_rationale_9",
+      "target": "app_models_basemodel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "app_models_rationale_14",
+      "target": "app_models_basemodel_save",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "app_models_order",
+      "target": "app_models_order_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "app_models_rationale_18",
+      "target": "app_models_order",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "source": "customer",
+      "target": "app_models_order",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "source": "order",
+      "target": "app_models_order",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/models.py",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "app_models_rationale_28",
+      "target": "app_models_customer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "source": "customer",
+      "target": "app_models_customer",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "source": "order",
+      "target": "app_models_customer",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "app_service",
+      "target": "app_service_compute_revenue",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "app_service",
+      "target": "app_service_load_customer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/adr-0001.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "app_service",
+      "target": "app_service_revenue_query"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "app_service_rationale_1",
+      "target": "app_service",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "app_service_rationale_5",
+      "target": "app_service",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/adr-0001.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "docs_adr_0001_revenue_in_warehouse",
+      "target": "app_service"
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "app_service_compute_revenue",
+      "target": "order",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "app_service_rationale_23",
+      "target": "app_service_compute_revenue",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/fixtures/tiny_repo/app/service.py",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "app_service_load_customer",
+      "target": "customer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/adr-0001.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "docs_adr_0001_revenue_in_warehouse",
+      "target": "app_service_revenue_query"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/adr-0001.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "docs_adr_0001_revenue_in_warehouse",
+      "target": "docs_adr_0001_orders_table"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/adr-0001.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "docs_adr_0001_revenue_in_warehouse",
+      "target": "docs_adr_0001_stg_orders"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/adr-0001.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "docs_adr_0001_stg_orders",
+      "target": "docs_adr_0001_orders_table"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "docs_adr_0001_revenue_computation_flow",
+      "label": "Warehouse Revenue Computation Flow",
+      "nodes": [
+        "docs_adr_0001_revenue_in_warehouse",
+        "docs_adr_0001_orders_table",
+        "docs_adr_0001_stg_orders",
+        "app_service",
+        "app_service_revenue_query"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "/Users/ashwathpc/Developer/brain/graphify-okf-bridge/tests/fixtures/tiny_repo/docs/adr-0001.md"
+    }
+  ],
+  "built_at_commit": "10d7a05877979eba74b730356157de3dfecb02a6"
+}
