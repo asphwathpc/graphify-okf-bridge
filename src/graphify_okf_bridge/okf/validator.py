@@ -51,6 +51,15 @@ def validate(bundle: Bundle, diagnostics: Sequence[Diagnostic] = ()) -> Validati
                         message=f"broken link to '{link.target}'",
                     )
                 )
+        for typed_link in concept.typed_links:
+            if typed_link.target not in concept_ids:
+                warnings.append(
+                    Diagnostic(
+                        path=concept_path,
+                        level="warning",
+                        message=f"broken link to '{typed_link.target}'",
+                    )
+                )
 
     concept_dirs = {posixpath.dirname(cid) for cid in bundle.concepts} | {""}
     for dir_path in sorted(concept_dirs):

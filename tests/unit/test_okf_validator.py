@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from graphify_okf_bridge.okf.model import Bundle, Concept, TypedLink
 from graphify_okf_bridge.okf.reader import read_bundle
 from graphify_okf_bridge.okf.validator import validate
 
@@ -46,6 +47,19 @@ def test_missing_description_is_a_soft_warning(tmp_path: Path) -> None:
     report = validate(bundle, diagnostics)
     assert report.errors == []
     assert any("description" in w.message.lower() for w in report.warnings)
+
+
+def test_broken_typed_link_target_is_a_soft_warning() -> None:
+    concept = Concept(
+        concept_id="code/thing",
+        type="code",
+        description="d",
+        typed_links=[TypedLink(target="code/nowhere", rel="references", confidence="INFERRED")],
+    )
+    bundle = Bundle(root=Path("."), concepts={"code/thing": concept})
+    report = validate(bundle)
+    assert report.errors == []
+    assert any("code/nowhere" in w.message for w in report.warnings)
 
 
 def test_missing_index_is_a_soft_warning(tmp_path: Path) -> None:
