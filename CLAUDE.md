@@ -55,3 +55,7 @@ Track phase progress here (update at the end of each session):
 - [x] Phase 3 — importer + round-trip
 - [x] Phase 4 — linker
 - [ ] Phase 5 — skill packaging, demo, PyPI release
+  - [x] 5a — `skill/SKILL.md` + `okf-bridge install-skill` (mirrors `graphify install`)
+  - [x] 5b — MCP path documented (`demo/mcp.md`; no new server needed, graphify's own `graphify.serve` covers it)
+  - [x] 5c — demo scaffolded: `demo/Makefile` + `demo/README.md`, real jaffle-shop clone + a hand-authored jaffle-shop table bundle (`demo/fixtures/jaffle_shop_tables/`) for the linker, GA4 imported alongside. **Not yet executed end-to-end** (needs network + an LLM backend for graphify's semantic pass + real API cost/time — deferred to a session where that's explicitly wanted) — no hero GIF recorded yet.
+  - [ ] 5d — release: README quickstart done; PyPI publish, `v0.1.0` tag, and the two upstream issues (knowledge-catalog `links:` proposal, Graphify exporter-plugin offer) still need explicit user go-ahead before executing (irreversible/externally-visible actions).
