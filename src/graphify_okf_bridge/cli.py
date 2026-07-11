@@ -53,6 +53,7 @@ def export(graph_json: str, bundle_dir: str) -> None:
     graph = load_graph(graph_json)
     bundle = export_graph(graph)
     write_bundle(bundle, Path(bundle_dir))
+    click.echo(f"{len(bundle.concepts)} concept(s) written to {bundle_dir}")
 
 
 @main.command(name="import")
@@ -67,6 +68,7 @@ def import_(bundle_dir: str, graph_json: str) -> None:
         click.echo(f"{diagnostic.level.upper():7} {diagnostic.path}: {diagnostic.message}")
 
     save_graph(graph, graph_json)
+    click.echo(f"{len(graph.nodes)} node(s), {len(graph.links)} edge(s) written to {graph_json}")
 
 
 @main.command()

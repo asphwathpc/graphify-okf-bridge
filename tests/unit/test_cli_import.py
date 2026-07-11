@@ -50,3 +50,13 @@ def test_import_output_is_plain_json(tmp_path: Path) -> None:
         main, ["import", str(FIXTURES / "okf_official" / "ga4"), "-o", str(out_path)]
     )
     json.loads(out_path.read_text(encoding="utf-8"))
+
+
+def test_import_prints_success_summary(tmp_path: Path) -> None:
+    out_path = tmp_path / "ga4_graph.json"
+    result = CliRunner().invoke(
+        main, ["import", str(FIXTURES / "okf_official" / "ga4"), "-o", str(out_path)]
+    )
+    assert result.exit_code == 0, result.output
+    assert "11 node(s), 9 edge(s) written to" in result.output
+    assert str(out_path) in result.output

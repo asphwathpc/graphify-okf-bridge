@@ -33,3 +33,12 @@ def test_export_creates_expected_directories(tmp_path: Path) -> None:
     assert (bundle_dir / "concept").is_dir()
     assert (bundle_dir / "overview.md").exists()
     assert (bundle_dir / "index.md").exists()
+
+
+def test_export_prints_success_summary(tmp_path: Path) -> None:
+    bundle_dir = tmp_path / "tiny_bundle"
+    result = CliRunner().invoke(
+        main, ["export", str(FIXTURES / "tiny_graph.json"), "-o", str(bundle_dir)]
+    )
+    assert result.exit_code == 0, result.output
+    assert f"concept(s) written to {bundle_dir}" in result.output
