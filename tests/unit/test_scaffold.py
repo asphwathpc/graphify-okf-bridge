@@ -24,8 +24,8 @@ def test_cli_help_lists_all_commands() -> None:
         assert cmd in result.output
 
 
-def test_remaining_subcommand_stubbed_not_broken(tmp_path: Path) -> None:
-    """`validate`/`export`/`import` are implemented as of Phase 1/2/3; `link` remains a stub."""
+def test_link_subcommand_is_implemented(tmp_path: Path) -> None:
+    """`validate`/`export`/`import`/`link` are all implemented as of Phase 1-4."""
     result = CliRunner().invoke(
         main,
         [
@@ -34,10 +34,11 @@ def test_remaining_subcommand_stubbed_not_broken(tmp_path: Path) -> None:
             str(FIXTURES / "okf_minimal"),
             "-o",
             str(tmp_path / "out.json"),
+            "--repo-root",
+            str(FIXTURES / "tiny_repo"),
         ],
     )
-    assert result.exit_code != 0
-    assert "not implemented" in result.output
+    assert result.exit_code == 0, result.output
 
 
 def test_import_subcommand_is_implemented(tmp_path: Path) -> None:

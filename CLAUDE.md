@@ -43,6 +43,7 @@ uv run okf-bridge validate tests/fixtures/okf_official/ga4   # smoke test
 - Edge → *both* a markdown link in the `## Connections` body section (so untyped OKF consumers see it) *and* a typed entry in the `links:` frontmatter extension: `{target, rel, confidence}`.
 - Import: typed `links:` entries keep their rel/confidence; plain body links become `references`/`EXTRACTED` edges.
 - Round-trip invariant: `import(export(g))` preserves node count, edge count, relations, confidences.
+- Linker: signals in priority order dbt `ref()`/`source()` → SQL literal (`FROM`/`JOIN`/`INSERT INTO`) → exact-name fallback; table concepts are OKF concepts under `tables/`; `.sql` files (invisible to graph.json) are scanned from disk via an explicit `--repo-root`; linker edge targets reuse the importer's `okf:<concept_id>` id so `link` output composes with `import` + `graphify merge-graphs`.
 
 ## Current status
 
@@ -52,5 +53,5 @@ Track phase progress here (update at the end of each session):
 - [x] Phase 1 — OKF model/reader/writer/validator
 - [x] Phase 2 — exporter
 - [x] Phase 3 — importer + round-trip
-- [ ] Phase 4 — linker
+- [x] Phase 4 — linker
 - [ ] Phase 5 — skill packaging, demo, PyPI release
