@@ -33,17 +33,25 @@ $(JAFFLE_SHOP):
 	graphify clone https://github.com/dbt-labs/jaffle-shop --out $(JAFFLE_SHOP)
 
 $(JAFFLE_SHOP)/graphify-out/graph.json: $(JAFFLE_SHOP)
-	cd $(JAFFLE_SHOP) && graphify .
+	cd $(JAFFLE_SHOP) && graphify . --backend ollama --model qwen2.5:7b-instruct --max-concurrency 1
 
 $(OUT)/ga4_graph.json: $(GA4_BUNDLE)
+	mkdir -p $(OUT)
 	$(OKF_BRIDGE) import $(GA4_BUNDLE) -o $(OUT)/ga4_graph.json
 
 $(OUT)/linked.json: $(JAFFLE_SHOP)/graphify-out/graph.json $(JAFFLE_TABLES_BUNDLE)
 	$(OKF_BRIDGE) link $(JAFFLE_SHOP)/graphify-out/graph.json $(JAFFLE_TABLES_BUNDLE) \
 		-o $(OUT)/linked.json --repo-root $(JAFFLE_SHOP)
 
-$(OUT)/merged.json: $(JAFFLE_SHOP)/graphify-out/graph.json $(OUT)/ga4_graph.json $(OUT)/linked.json
-	graphify merge-graphs $(JAFFLE_SHOP)/graphify-out/graph.json $(OUT)/ga4_graph.json $(OUT)/linked.json \
+# linked.json is already self-contained (MAPPING.md L13): okf-bridge link
+# writes back the input graph's own nodes/edges *plus* synthetic nodes for
+# both the new .sql source nodes and the okf: table concept targets. Merging
+# the raw jaffle-shop code graph, or a separate `okf-bridge import` of the
+# table bundle, in too would duplicate those nodes under a second repo tag --
+# graphify merge-graphs namespaces node ids per source file, so it never
+# unifies the same string id coming from two different input files.
+$(OUT)/merged.json: $(OUT)/ga4_graph.json $(OUT)/linked.json
+	graphify merge-graphs $(OUT)/ga4_graph.json $(OUT)/linked.json \
 		--out $(OUT)/merged.json
 
 clean:

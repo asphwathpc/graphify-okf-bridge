@@ -38,7 +38,13 @@ Requires: network (clones jaffle-shop), `graphify` on `PATH` (`uv tool install
 graphifyy`), and an LLM backend configured for graphify's own semantic
 extraction pass (`GEMINI_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, ... —
 see `graphify extract --help`). AST-only code extraction works without one;
-graphify's community *naming* step wants a backend.
+graphify's community *naming* step wants a backend. This demo defaults to a
+local, zero-cost backend (`--backend ollama --model qwen2.5:7b-instruct`, see
+the Makefile) so no API key or spend is required — just `ollama serve`
+running locally with that model pulled (`ollama pull qwen2.5:7b-instruct`).
+Pick a model size that fits comfortably in your machine's RAM: an
+undersized-for-RAM model (e.g. a 36B model on a 24GB machine) will thrash
+and can be 10-50x slower than one that fits with headroom.
 
 `make demo` (see [`Makefile`](Makefile)) does, in order:
 
@@ -48,8 +54,14 @@ graphify's community *naming* step wants a backend.
 4. `okf-bridge link <jaffle-shop graph> demo/fixtures/jaffle_shop_tables --repo-root <jaffle-shop clone>`
    — infer `reads_from`/`writes_to` edges from the real `{{ ref(...) }}` calls
    in jaffle-shop's `.sql` files (invisible to `graph.json` itself per
-   `spec/MAPPING.md` §1 surprise 1 — the linker reads them from disk).
-5. `graphify merge-graphs <code> <ga4> <linked>` — one graph.
+   `spec/MAPPING.md` §1 surprise 1 — the linker reads them from disk). The
+   output is self-contained (`spec/MAPPING.md` L13): alongside the new edges,
+   it carries synthetic nodes for both the `.sql` source side *and* the
+   `okf:tables/*` concept target side (real titles, not placeholders) — the
+   jaffle_shop_tables bundle itself is never separately imported/merged, since
+   `graphify merge-graphs` namespaces node ids per source file and would
+   otherwise produce a second, duplicate copy of each table concept.
+5. `graphify merge-graphs <ga4> <linked>` — one graph.
 6. `graphify path "stg_orders.sql" "customers"` — traverses
    `stg_orders.sql` → (dbt ref, `reads_from`) → the `orders` table concept →
    (dbt ref) → the `customers` table concept, entirely through edges that

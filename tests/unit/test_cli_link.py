@@ -35,7 +35,8 @@ def test_link_merges_inferred_edges_into_output_graph(tmp_path: Path) -> None:
     linked = load_graph(out_path)
 
     assert len(linked.links) == len(original.links) + 5
-    assert len(linked.nodes) == len(original.nodes) + 2  # two synthetic .sql source nodes
+    # two synthetic .sql source nodes + two synthetic okf: concept target nodes (L13)
+    assert len(linked.nodes) == len(original.nodes) + 4
 
     new_edges = [e for e in linked.links if e.confidence == "INFERRED" and e.model_extra
                  and "linker_signal" in e.model_extra]

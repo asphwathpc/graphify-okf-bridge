@@ -8,7 +8,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from graphify_okf_bridge.graphify_io.loader import load_graph
-from graphify_okf_bridge.graphify_io.schema import Edge, Node
+from graphify_okf_bridge.graphify_io.schema import Edge, Hyperedge, Node
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
 
@@ -50,6 +50,29 @@ def test_edges_reference_declared_confidence_levels() -> None:
     graph = load_graph(FIXTURES / "tiny_graph.json")
     for edge in graph.links:
         assert edge.confidence in {"EXTRACTED", "INFERRED", "AMBIGUOUS"}
+
+
+def test_hyperedge_source_file_may_be_null() -> None:
+    """Real graphify output (captured from a `graphify .` run over jaffle-shop
+    for the Phase 5c demo) has hyperedges with `source_file: null` when the
+    grouped nodes have no single natural originating file — MAPPING.md §1
+    surprise 4."""
+    Hyperedge.model_validate(
+        {
+            "id": "dbt_project_yml_packages_yml_requirements_txt_taskfile_yml",
+            "label": "Project Configuration and Dependencies",
+            "nodes": [
+                "src_dbt_project_yml_jaffle_shop",
+                "src_packages_yml_jaffle_shop",
+                "src_requirements_txt_jaffle_shop",
+                "src_taskfile_yml_jaffle_shop",
+            ],
+            "relation": "participate_in",
+            "confidence": "EXTRACTED",
+            "confidence_score": 0.75,
+            "source_file": None,
+        }
+    )
 
 
 def test_node_and_edge_models_are_permissive_to_unknown_keys() -> None:

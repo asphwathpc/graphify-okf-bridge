@@ -80,7 +80,9 @@ class Hyperedge(BaseModel):
     relation: str
     confidence: str
     confidence_score: float | None = None
-    source_file: str
+    # Nullable: graphify emits null when the grouped nodes have no single
+    # natural originating file (MAPPING.md §1 surprise 4).
+    source_file: str | None = None
 
 
 class GraphAttrs(BaseModel):

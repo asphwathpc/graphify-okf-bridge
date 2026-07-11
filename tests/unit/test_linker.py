@@ -84,7 +84,28 @@ def test_synthetic_nodes_cover_every_sql_source_id(tmp_path: Path) -> None:
     edge_sources = {e.source for e in result.edges}
     sql_sources = {s for s in edge_sources if s.startswith("sql:")}
     assert sql_sources == {"sql:analytics/orders_model.sql", "sql:analytics/stg_orders.sql"}
-    assert {n.id for n in result.synthetic_nodes} == sql_sources
+
+    synthetic_ids = {n.id for n in result.synthetic_nodes}
+    assert sql_sources <= synthetic_ids
+
+
+def test_synthetic_nodes_also_cover_every_okf_target_id() -> None:
+    """L13: link() output is self-contained -- every edge target gets a synthetic
+    concept node too, not just sql: sources, so a single link() output file
+    doesn't depend on graphify merge-graphs unifying ids across separate files."""
+    result = _tiny_result()
+
+    edge_targets = {e.target for e in result.edges}
+    okf_targets = {t for t in edge_targets if t.startswith("okf:")}
+    assert okf_targets == {"okf:tables/orders", "okf:tables/customers"}
+
+    synthetic_ids = {n.id for n in result.synthetic_nodes}
+    assert okf_targets <= synthetic_ids
+
+    for node in result.synthetic_nodes:
+        if node.id in okf_targets:
+            assert node.file_type == "concept"
+            assert node.label
 
 
 def test_link_is_deterministic() -> None:
@@ -299,6 +320,59 @@ def test_module_node_falls_back_when_source_location_is_missing(tmp_path: Path) 
     assert result.edges[0].source == "mod"
 
 
+def test_relative_source_file_is_resolved_against_repo_root_not_cwd(tmp_path: Path) -> None:
+    """MAPPING.md L6 (revised 2026-07-11): graphify commonly runs with CWD
+    inside the target repo, so `source_file` on `_origin: ast` nodes is
+    repo-relative, not CWD-relative -- and the linker is typically invoked
+    later, from a different CWD. `repo_root` must be joined onto a relative
+    `source_file` rather than assuming it resolves as-is."""
+    repo_root = tmp_path / "jaffle-shop"
+    (repo_root / "models").mkdir(parents=True)
+    (repo_root / "models" / "app.py").write_text("SELECT * FROM widgets\n", encoding="utf-8")
+    node = Node(
+        id="mod",
+        label="app.py",
+        file_type="code",
+        source_file="models/app.py",
+        source_location="L1",
+        origin="ast",
+    )
+    bundle = Bundle(
+        root=repo_root,
+        concepts={"tables/widgets": Concept(concept_id="tables/widgets", type="BigQuery Table")},
+    )
+    result = link(_minimal_graph([node]), bundle, repo_root)
+
+    assert len(result.edges) == 1
+    assert result.edges[0].source == "mod"
+    assert result.edges[0].source_file == "models/app.py"
+
+
+def test_ast_node_with_empty_source_file_is_skipped_not_crashed(tmp_path: Path) -> None:
+    """MAPPING.md §1 surprise 5: real graphify output can carry a `code`/`ast`
+    node with `source_file: ""` (an unattributed nested class). `Path("")`
+    resolves to the cwd directory, so reading it naively raises
+    `IsADirectoryError` instead of skipping a missing file -- the linker must
+    exclude such nodes before attempting to read them from disk."""
+    good_node = _module_node("widgets", "app.py", "SELECT * FROM widgets\n", tmp_path)
+    orphan_node = Node(
+        id="authheader",
+        label="AuthHeader",
+        file_type="code",
+        source_file="",
+        source_location="",
+        origin="ast",
+    )
+    bundle = Bundle(
+        root=tmp_path,
+        concepts={"tables/widgets": Concept(concept_id="tables/widgets", type="BigQuery Table")},
+    )
+    result = link(_minimal_graph([good_node, orphan_node]), bundle, tmp_path)
+
+    assert len(result.edges) == 1
+    assert result.edges[0].source == "widgets"
+
+
 def test_same_table_reached_by_two_signals_from_one_source_dedups(tmp_path: Path) -> None:
     """SQL-literal + exact-name both pointing widgets->widgets from the same source collapses."""
     node = _module_node("widgets", "app.py", "SELECT * FROM widgets\n", tmp_path)
@@ -311,3 +385,50 @@ def test_same_table_reached_by_two_signals_from_one_source_dedups(tmp_path: Path
 
     assert len(result.edges) == 1
     assert result.edges[0].model_extra["linker_signal"] == "sql_literal"
+
+
+def test_sql_file_reuses_existing_same_stem_code_node_instead_of_synthetic(
+    tmp_path: Path,
+) -> None:
+    """MAPPING.md L7a: a semantically-extracted node (no `_origin: ast`) named
+    after a dbt model -- e.g. from that model's schema.yml, the real situation
+    graphify produced for jaffle-shop's stg_orders -- must absorb the edges
+    from its same-named `.sql` file rather than the file getting a second,
+    disconnected `sql:<path>` identity."""
+    (tmp_path / "models").mkdir()
+    (tmp_path / "models" / "stg_orders.sql").write_text("SELECT * FROM widgets\n", encoding="utf-8")
+    semantic_node = Node(
+        id="stg_orders_model",
+        label="stg_orders model",
+        file_type="code",
+        source_file="models/stg_orders.yml",
+    )
+    bundle = Bundle(
+        root=tmp_path,
+        concepts={"tables/widgets": Concept(concept_id="tables/widgets", type="BigQuery Table")},
+    )
+    result = link(_minimal_graph([semantic_node]), bundle, tmp_path)
+
+    assert len(result.edges) == 1
+    assert result.edges[0].source == "stg_orders_model"
+    assert not any(n.id.startswith("sql:") for n in result.synthetic_nodes)
+
+
+def test_sql_file_falls_back_to_synthetic_node_when_stem_match_is_ambiguous(
+    tmp_path: Path,
+) -> None:
+    """Two distinct labels both stem-matching the file's stem is unresolvable --
+    same L3 precision-over-recall policy as L10 -- so the original synthetic
+    `sql:<path>` node is used, unchanged."""
+    (tmp_path / "stg_orders.sql").write_text("SELECT * FROM widgets\n", encoding="utf-8")
+    node_a = Node(id="a", label="stg_orders model", file_type="code", source_file="a.yml")
+    node_b = Node(id="b", label="stg_orders staging", file_type="code", source_file="b.yml")
+    bundle = Bundle(
+        root=tmp_path,
+        concepts={"tables/widgets": Concept(concept_id="tables/widgets", type="BigQuery Table")},
+    )
+    result = link(_minimal_graph([node_a, node_b]), bundle, tmp_path)
+
+    assert len(result.edges) == 1
+    assert result.edges[0].source == "sql:stg_orders.sql"
+    assert any(n.id == "sql:stg_orders.sql" for n in result.synthetic_nodes)

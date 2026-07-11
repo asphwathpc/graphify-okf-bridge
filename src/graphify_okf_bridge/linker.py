@@ -69,9 +69,7 @@ def link(graph: Graph, bundle: Bundle, repo_root: Path) -> LinkResult:
     table_concepts = _table_concepts(bundle)
 
     ast_nodes_by_file = _ast_nodes_by_file(graph)
-    module_node_by_file = {
-        file: _module_node(nodes) for file, nodes in ast_nodes_by_file.items()
-    }
+    module_node_by_file = {file: _module_node(nodes) for file, nodes in ast_nodes_by_file.items()}
 
     result = LinkResult(diagnostics=diagnostics)
     seen_synthetic_ids: set[str] = set()
@@ -93,7 +91,19 @@ def link(graph: Graph, bundle: Bundle, repo_root: Path) -> LinkResult:
                 )
             )
             return
-        target_id = f"okf:{concept_ids[0]}"
+        concept_id = concept_ids[0]
+        target_id = f"okf:{concept_id}"
+        if target_id not in seen_synthetic_ids:
+            seen_synthetic_ids.add(target_id)
+            concept = bundle.concepts[concept_id]
+            result.synthetic_nodes.append(
+                Node(
+                    id=target_id,
+                    label=concept.title or concept.concept_id,
+                    file_type="concept",
+                    source_file=str(bundle.root / f"{concept.concept_id}.md"),
+                )
+            )
         key = (source_id, target_id, relation)
         if key in seen_edges:
             return
@@ -111,19 +121,28 @@ def link(graph: Graph, bundle: Bundle, repo_root: Path) -> LinkResult:
 
     for file in sorted(ast_nodes_by_file):
         source_id = module_node_by_file[file]
-        text = Path(file).read_text(encoding="utf-8")
+        text = _resolve_ast_source_file(file, repo_root).read_text(encoding="utf-8")
         for relation, table_name, signal in _scan_file_signals(text, is_sql=False):
             emit(source_id, file, table_name, relation, signal)
 
     for sql_file in sorted(repo_root.rglob("*.sql")):
         rel = sql_file.relative_to(repo_root).as_posix()
-        source_id = f"sql:{rel}"
         source_file = sql_file.as_posix()
-        if source_id not in seen_synthetic_ids:
-            seen_synthetic_ids.add(source_id)
-            result.synthetic_nodes.append(
-                Node(id=source_id, label=sql_file.name, file_type="code", source_file=source_file)
-            )
+        reused = _existing_node_for_sql_stem(sql_file.stem, graph)
+        if reused is not None:
+            source_id = reused.id
+        else:
+            source_id = f"sql:{rel}"
+            if source_id not in seen_synthetic_ids:
+                seen_synthetic_ids.add(source_id)
+                result.synthetic_nodes.append(
+                    Node(
+                        id=source_id,
+                        label=sql_file.name,
+                        file_type="code",
+                        source_file=source_file,
+                    )
+                )
         text = sql_file.read_text(encoding="utf-8")
         for relation, table_name, signal in _scan_file_signals(text, is_sql=True):
             emit(source_id, source_file, table_name, relation, signal)
@@ -147,12 +166,33 @@ def _table_concepts(bundle: Bundle) -> dict[str, list[str]]:
 
 
 def _ast_nodes_by_file(graph: Graph) -> dict[str, list[Node]]:
-    """MAPPING.md L7: only `_origin: ast` code nodes have filesystem-resolvable paths."""
+    """MAPPING.md L7: only `_origin: ast` code nodes have filesystem-resolvable paths.
+
+    MAPPING.md §1 surprise 5: some AST nodes carry `source_file: ""` (e.g. a
+    nested/mixin class graphify couldn't attribute to a file); `""` is not a
+    resolvable path (and `Path("").read_text()` resolves to the cwd directory,
+    not a missing-file error), so those nodes are excluded here rather than
+    crashing the linker.
+    """
     by_file: dict[str, list[Node]] = defaultdict(list)
     for node in graph.nodes:
-        if node.file_type == "code" and node.origin == "ast":
+        if node.file_type == "code" and node.origin == "ast" and node.source_file:
             by_file[node.source_file].append(node)
     return by_file
+
+
+def _resolve_ast_source_file(file: str, repo_root: Path) -> Path:
+    """MAPPING.md L6: an `_origin: ast` node's `source_file` is relative to
+    whatever CWD graphify happened to have at extraction time -- which may or
+    may not still be this process's CWD. Try as-is (CWD-relative, the
+    historical assumption) first; fall back to `repo_root`-relative for the
+    common real-world case where extraction ran with CWD inside the target
+    repo (`cd repo && graphify .`) and `link` is invoked later from elsewhere.
+    """
+    as_is = Path(file)
+    if as_is.is_absolute() or as_is.exists():
+        return as_is
+    return repo_root / file
 
 
 def _line_number(location: str | None) -> int:
@@ -195,6 +235,40 @@ def _scan_file_signals(text: str, *, is_sql: bool) -> list[tuple[str, str, str]]
 
 def _singular(word: str) -> str:
     return word[:-1] if len(word) > 1 and word.endswith("s") else word
+
+
+def _existing_node_for_sql_stem(stem: str, graph: Graph) -> Node | None:
+    """MAPPING.md L7 (revised 2026-07-11): a `.sql` file can have a same-model
+    twin already in `graph` -- e.g. semantic extraction naming a dbt model
+    from its companion `schema.yml` even though the `.sql` file itself
+    produced no AST node. Minting a synthetic `sql:<path>` node for such a
+    file duplicates an already-connected identity with a disconnected one
+    (the synthetic node only gets edges if *this file's own text* matches a
+    known table -- e.g. a staging model whose only reference is an
+    unmodeled raw source table ends up an orphan, even though the real
+    model node is linked via L10's exact-name fallback).
+
+    Reuses only by stem-normalized label token -- the same mechanism and
+    trust level as L10 -- never by `source_file` (semantically-extracted
+    nodes' `source_file` points at the doc they were extracted from, not
+    the code tree; see §1 surprise 4, `_ast_nodes_by_file`'s docstring).
+    Ambiguous (2+ distinct labels matching) or no match: fall back to the
+    original synthetic-node behavior, unchanged.
+    """
+    target = _singular(stem.lower())
+    candidates: dict[str, list[Node]] = defaultdict(list)
+    for node in graph.nodes:
+        if node.file_type != "code":
+            continue
+        tokens = _WORD_RE.findall(node.label.lower())
+        stems = {_singular(t) for t in tokens}
+        if target in stems:
+            candidates[node.label].append(node)
+
+    if len(candidates) != 1:
+        return None
+    (nodes,) = candidates.values()
+    return min(nodes, key=lambda n: (n.id == (n.norm_label or ""), n.id))
 
 
 def _exact_name_matches(
